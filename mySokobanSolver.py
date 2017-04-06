@@ -24,11 +24,9 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
-    return [ (1234567, 'Ada', 'Lovelace'), (1234568, 'Grace', 'Hopper'), (1234569, 'Eva', 'Tardos') ]
-    raise NotImplementedError()
+    return [ (9708651, 'Christopher', 'O\'Rafferty'), (1234568, 'Grace', 'Hopper'), (1234569, 'Eva', 'Tardos') ]
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
 def taboo_cells(warehouse):
     '''  
@@ -49,8 +47,9 @@ def taboo_cells(warehouse):
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
     '''
-    ##         "INSERT YOUR CODE HERE"    
     raise NotImplementedError()
+
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -61,13 +60,13 @@ class SokobanPuzzle(search.Problem):
     Your implementation should be compatible with the
     search functions of the provided module 'search.py'.
     
-    	Use the sliding puzzle and the pancake puzzle for inspiration!
+    Use the sliding puzzle and the pancake puzzle for inspiration!
     
     '''
     ##         "INSERT YOUR CODE HERE"
     
     def __init__(self, warehouse):
-        raise NotImplementedError()
+        self.warehouse = warehouse        
 
     def actions(self, state):
         """
@@ -75,7 +74,92 @@ class SokobanPuzzle(search.Problem):
         if these actions do not push a box in a taboo cell.
         The actions must belong to the list ['Left', 'Down', 'Right', 'Up']        
         """
-        raise NotImplementedError
+        _actions = []
+
+        if (tuple((state.worker[0]-1, state.worker[1])) not in state.walls):
+            if (tuple((state.worker[0]-1, state.worker[1])) in state.boxes):
+                if (tuple((state.worker[0]-2, state.worker[1])) not in state.boxes + state.walls):
+                    _actions.append('Left')
+            else:
+                _actions.append('Left')
+            
+        if (tuple((state.worker[0], state.worker[1]+1)) not in state.walls):
+            if (tuple((state.worker[0], state.worker[1]+1)) in state.boxes):
+                if (tuple((state.worker[0], state.worker[1]+2)) not in state.boxes + state.walls):
+                    _actions.append('Down')
+            else:
+                _actions.append('Down')
+            
+        if (tuple((state.worker[0]+1, state.worker[1])) not in state.walls):
+            if (tuple((state.worker[0]+1, state.worker[1])) in state.boxes):
+                if (tuple((state.worker[0]+2, state.worker[1])) not in state.boxes + state.walls):
+                    _actions.append('Right')
+            else:
+                _actions.append('Right')
+            
+        if (tuple((state.worker[0], state.worker[1]-1)) not in state.walls):
+            if (tuple((state.worker[0], state.worker[1]-1)) in state.boxes):
+                if (tuple((state.worker[0], state.worker[1]-2)) not in state.boxes + state.walls):
+                    _actions.append('Up')
+            else:
+                _actions.append('Up')
+
+            
+        return _actions
+
+    def result(self, state, action):
+        """
+        Return the state that results from executing the given
+        action in the given state. The action must be one of
+        self.actions(state).
+        """
+        if (action in self.actions(state)):
+            worker = list(state.worker)
+            
+            if (action == "Left"):                
+                worker[0] -= 1
+                if (tuple(worker) in state.boxes):
+                    index = state.boxes.index(tuple(worker))             
+                    box = list(state.boxes[index])
+                    box[0] -= 1
+                    state.boxes[index] = tuple(box)
+            if (action == "Right"):                
+                worker[0] += 1
+                if (tuple(worker) in state.boxes):
+                    index = state.boxes.index(tuple(worker))             
+                    box = list(state.boxes[index])
+                    box[0] += 1
+                    state.boxes[index] = tuple(box)
+            if (action == "Up"):                
+                worker[1] -= 1
+                if (tuple(worker) in state.boxes):
+                    index = state.boxes.index(tuple(worker))             
+                    box = list(state.boxes[index])
+                    box[1] -= 1
+                    state.boxes[index] = tuple(box)
+            if (action == "Down"):                
+                worker[1] += 1
+                if (tuple(worker) in state.boxes):
+                    index = state.boxes.index(tuple(worker))             
+                    box = list(state.boxes[index])
+                    box[1] += 1
+                    state.boxes[index] = tuple(box)
+
+            state.worker = tuple(worker)
+
+        return state
+
+    
+    def goal_test(self, state):
+        """Return True if the state is a goal. The default method compares the
+        state to self.goal, as specified in the constructor. Override this
+        method if checking against a single self.goal is not enough."""
+        for box in state.boxes:
+            if box not in state.targets:
+                return False
+
+        return True
+        
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

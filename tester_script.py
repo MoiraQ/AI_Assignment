@@ -25,11 +25,11 @@ puzzle_t1 ='''
 
 puzzle_t2 ='''
   #######
-  #     #
-  # .$. #
- ## $@$ #
- #  .$. #
- #      #
+  #  .  #
+  #  $  #
+ ##.$@$.#
+ #   $  #
+ #   .  #
  ########
 '''
 
@@ -56,6 +56,34 @@ expected_answer_1 ='''
  ####
 '''
 
+puzzle_my_test ='''
+#########
+# .  $ @#
+#########'''
+
+def test_my_warehouse():       
+    wh = Warehouse()
+    # read the puzzle from the multiline string 
+    wh.extract_locations(puzzle_t2.split(sep='\n'))
+    print(wh)
+
+    sp = SokobanPuzzle(wh)
+
+    print("Moving Up", sp.result(wh, "Up"))
+    print("Goal Reached: ", sp.goal_test(wh))
+    print("Moving Down", sp.result(wh, "Down"))
+    print("Goal Reached: ", sp.goal_test(wh))
+    print("Moving Down", sp.result(wh, "Down"))
+    print("Goal Reached: ", sp.goal_test(wh))
+    print("Moving Up", sp.result(wh, "Up"))
+    print("Goal Reached: ", sp.goal_test(wh))
+    print("Moving Left", sp.result(wh, "Left"))
+    print("Goal Reached: ", sp.goal_test(wh))
+    print("Moving Right", sp.result(wh, "Right"))
+    print("Goal Reached: ", sp.goal_test(wh))
+    print("Moving Right", sp.result(wh, "Right"))
+    print("Goal Reached: ", sp.goal_test(wh))
+
 
 def test_warehouse_1():
     wh = Warehouse()
@@ -63,11 +91,13 @@ def test_warehouse_1():
     wh.extract_locations(puzzle_t2.split(sep='\n'))
     print("\nPuzzle from multiline string")
     print(wh)
+    print(actions(wh))
 
 def test_warehouse_2():
     problem_file = "./warehouses/warehouse_01.txt"
     wh = Warehouse()
     wh.read_warehouse_file(problem_file)
+    
     print("\nPuzzle from file")
     print(wh)
     print(wh.worker) # x,y  coords !!
@@ -117,9 +147,10 @@ def test_solve_sokoban_macro():
 if __name__ == "__main__":
     pass    
 #    test_warehouse_1() # test Warehouse
+    test_my_warehouse()
 #    test_warehouse_2() # test Warehouse
     
-    print(my_team())  # should print your team
+#    print(my_team())  # should print your team
 
 #    test_taboo_cells() 
 #    test_check_elem_action_seq()
