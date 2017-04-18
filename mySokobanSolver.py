@@ -24,7 +24,7 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
-    return [ (9708651, 'Christopher', 'O\'Rafferty'), (9400001, 'Moira', 'Quinn'), (1234569, 'Eva', 'Tardos') ]
+    return [ (9708651, 'Christopher', 'O\'Rafferty'), (9400001, 'Moira', 'Quinn'), (7226209, 'Maurice', 'Cafun') ]
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -47,9 +47,126 @@ def taboo_cells(warehouse):
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
     '''
+     # Variables 
+    left_walls = []
+    right_walls = []
+    deviation_left = []
+    deviation_right = []
+    legal_area = []
+    current_cell = 0
+    
+    # Get Warehouse as String and Format
+    wh = warehouse.__str__()
+    # Get Length of Warehouse 
+    wh_length = wh.find('\n')
+    # Get Cell Where Top Wall Starts
+    wall_start_top = wh.find('#') - wh_length
+
+    # Convert Warehouse to List and Format
+    # Note: Am Using a list so data can be manipulated
+    wh = list(wh)
+    # Remove first blank line on warehouse (occurs on import)
+    del wh[0:wh_length]; 
+
+    # Variable for Search
+    j = wall_start_top+1
+    
+    # Find ALl Cells Between the Walls of the Warehouse
+    for i in range(0,len(wh)):
+        # All the Left Walls
+        if(wh[i] == '#' and len(left_walls) <= int(i/(wh_length+1))):
+            left_walls.append(i)
+        # All the Right Walls
+        if(i > (wh_length+1) and i%(wh_length+1) == 0 and i-((i/(wh_length+1))*(wh_length+1)) == 0):
+            while True:
+                if(wh[i-j] == '#'):
+                  right_walls.append(i-j)
+                  break
+                else:
+                    j -= 1
+        # Reset Offset Variable
+        j = wall_start_top+1
+
+    # Format Left Walls to Only Include Playable Area
+    del left_walls[0]
+    del left_walls[-1]
+
+    # Get the Legal Area (Between the Walls)
+    for i in range(0,len(left_walls)):
+        for j in range(1,right_walls[i]-left_walls[i]):
+            if(wh[left_walls[i]+j] != '#'):
+                legal_area.append(left_walls[i]+j)
+
+    # Get Cells Where Wall Deviates on the Left Side
+    for i in range(1,len(left_walls)):
+        if(left_walls[i]-left_walls[i-1] != wh_length+1):
+            deviation_left.append(left_walls[i])
+
+    # Get Cells Where Wall Deviates on the Right Side
+    for i in range(1,len(right_walls)):
+        if(right_walls[i]-right_walls[i-1] != wh_length+1):
+            deviation_right.append(right_walls[i])
+
+
+##    j = 0
+    # Search through each cell of the warehouse
+    for i in wh:
+        # Check Cell is in Legal Area
+        if(current_cell in legal_area):
+            # Top Corners on Left Side
+            if(wh[current_cell-1] == '#' and wh[current_cell] != '#' and  wh[current_cell] != '.' and wh[current_cell-wh_length-1] == '#'):
+                wh[current_cell] = 'X'
+                
+            # Top Corners on Right Side
+            if(wh[current_cell+1] == '#' and wh[current_cell] != '#' and wh[current_cell] != '.' and wh[current_cell-wh_length-1] == '#'):
+                wh[current_cell] = 'X'
+                
+            # Bottom Corners on Left Side
+            if(wh[current_cell-1] == '#' and wh[current_cell] != '#' and  wh[current_cell] != '.' and wh[current_cell+wh_length+1] == '#'):
+                wh[current_cell] = 'X'
+                
+            # Bottom Corners on Right Side
+            if(wh[current_cell+1] == '#' and wh[current_cell] != '#' and  wh[current_cell] != '.' and wh[current_cell+wh_length+1] == '#'):
+                wh[current_cell] = 'X'
+                
+##            # Check Rule 2 on Left Side
+##            if(len(deviation_left) == 1 and is_between(deviation_left[0]+1,current_cell-wh_length-1,current_cell)
+##               and wh[current_cell-1] == '#' and wh[current_cell] != '.' and wh[current_cell] != '#'):
+##                wh[current_cell] = 'X'     
+##            elif(len(deviation_left) > 1 and is_between(deviation_left[j]+1,current_cell-wh_length-1,current_cell)
+##                 and wh[current_cell-1] == '#' and wh[current_cell] != '.' and wh[current_cell] != '#'):
+##                wh[current_cell] = 'X'
+##                if(j+1 < len(deviation_left)):
+##                   j += 1
+##
+##            # Check Rule 2 on Right Side
+##            if(len(deviation_right) == 1 and is_between(deviation_right[0]-1,current_cell-wh_length-1,current_cell)
+##               and wh[current_cell+1] == '#' and wh[current_cell] != '.' and wh[current_cell] != '#'):
+##                wh[current_cell] = 'X'
+##            elif(len(deviation_right) > 1 and is_between(deviation_right[j]-1,current_cell-wh_length-1,current_cell)
+##               and wh[current_cell+1] == '#' and wh[current_cell] != '.' and wh[current_cell] != '#' and wh[current_cell-wh_length-1] == '#'):
+##                wh[current_cell] = 'X'
+##                if(j+1 < len(deviation_right)):
+##                   j += 1
+
+        # Increment Counter
+        current_cell += 1
+
+    # Reset Counter
+    current_cell = 0
+    # Remove Other Symbols in Warehouse
+    for i in wh:
+        # Replace Player, Box and Target With Blank Space
+        if(i == '@' or i == '$' or i == '.' or i == '*'):
+            wh[current_cell] = ' '
+        # Increment Counter
+        current_cell += 1
+
+    # Convert Taboo Warehouse from List to String
+    wh = ''.join(wh)
+    print(wh)
+    return wh
     raise NotImplementedError()
-
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

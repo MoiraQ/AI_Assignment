@@ -61,6 +61,35 @@ puzzle_my_test ='''
 # .  $ @#
 #########'''
 
+# Added by Maurice
+puzzle_t5 ='''
+  ###### 
+  #    # 
+  # .$.# 
+ ## $@$##
+ #  .$. #
+ #      #
+ #      #
+ ##    ##
+  #    # 
+ ##    ##
+ #      #
+ ########'''
+
+expected_answer_5 ='''
+  ###### 
+  #X  X# 
+  #    # 
+ ##    ##
+ #X    X#
+ #X    X#
+ #X    X#
+ ##    ##
+  #    # 
+ ##    ##
+ #X    X#
+ ########'''
+
 def test_my_warehouse():       
     wh = Warehouse()
     # read the puzzle from the multiline string 
@@ -109,6 +138,11 @@ def test_taboo_cells():
     answer = taboo_cells(wh)
     assert( answer == expected_answer_3 )
 
+    # Added by Maurice
+    wh5 = Warehouse()
+    wh5.extract_locations(puzzle_t5.split(sep='\n'))
+    answer = taboo_cells(wh5)
+    assert( answer == expected_answer_5 )
 
 def test_check_elem_action_seq():
     problem_file = "./warehouses/warehouse_01.txt"
@@ -152,7 +186,7 @@ if __name__ == "__main__":
     
 #    print(my_team())  # should print your team
 
-#    test_taboo_cells() 
+    test_taboo_cells() 
 #    test_check_elem_action_seq()
 #    test_solve_sokoban_elem()
 #    test_can_go_there()
