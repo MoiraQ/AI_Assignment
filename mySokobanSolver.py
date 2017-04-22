@@ -164,7 +164,7 @@ def taboo_cells(warehouse):
 
     # Convert Taboo Warehouse from List to String
     wh = ''.join(wh)
-    print(wh)
+##    print(wh)
     return wh
     raise NotImplementedError()
 
