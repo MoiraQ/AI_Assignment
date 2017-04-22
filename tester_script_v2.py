@@ -69,6 +69,25 @@ expected_answer_1 ='''
  ####
 '''
 
+# Added by Maurice
+puzzle_t4 =''' 
+  ###  
+###X###
+#     #
+#.* $@#
+#     #
+### ###
+ ####'''
+
+expected_answer_4 =''' 
+  ###  
+###X###
+#XX XX#
+# X XX#
+#XX XX#
+###X###
+ #### '''
+
 def same_multi_line_strings(s1,s2):
     '''
     Auxiliary function to test two multi line string representing warehouses
@@ -111,9 +130,23 @@ def test_taboo_cells():
         print('Test taboo_cells passed\n')
     else:
         print('** Test taboo_cells failed\n')
-        
+
 #    assert( answer.strip() == expected_answer_3.strip() )
 
+    # Added by Maurice
+    wh = Warehouse()
+    wh.extract_locations(puzzle_t4.split(sep='\n'))
+    answer = taboo_cells(wh)
+    # begin debug
+    print(answer)
+    print(len(answer))
+    print(expected_answer_4)
+    print(len(expected_answer_4))
+    # end debug
+    if same_multi_line_strings(answer,expected_answer_4):
+        print('Test taboo_cells passed\n')
+    else:
+        print('** Test taboo_cells failed\n')
 
 def test_check_elem_action_seq():
     problem_file = "./warehouses/warehouse_01.txt"

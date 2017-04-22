@@ -47,9 +47,14 @@ def taboo_cells(warehouse):
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
     '''
+    
     # Variables 
     legal_area = []
+    right_side = []
+    left_side = []
     j = 0
+    k = 0;
+    l = 0;
     
     # Get Warehouse as String and Format
     wh = warehouse.__str__()
@@ -62,6 +67,8 @@ def taboo_cells(warehouse):
     player = list(sokoban.find_1D_iterator(wh, '@'))
     boxes = list(sokoban.find_1D_iterator(wh, '$'))
     target = list(sokoban.find_1D_iterator(wh, '.'))
+    player_on_target = list(sokoban.find_1D_iterator(wh, '!'))
+    box_on_target = list(sokoban.find_1D_iterator(wh, '*'))
 
     # Convert Warehouse to List and Format
     # Note: Am Using a list so data can be manipulated
@@ -70,30 +77,83 @@ def taboo_cells(warehouse):
     # Find all areas between walls
     for i in walls:
         if (i+1 <= walls[-1]):
-            # Check Left Hand Side
-            if(wh[i+1] != '#' and wh[i+1] != '\n'):
+            if(wh[i+1] != '#' and wh[i+1] != '\n' and wh[i+1-wh_length-1] == '#'):
                 legal_area.append(i)
-            # Check Right Hand Side
-            elif(wh[i-1] != '#' and wh[i-1] != '\n'):
+            elif(len(legal_area) > 0 and wh[i+1] != '#' and wh[i+1] != '\n'):
                 legal_area.append(i)
-  
+            elif(len(legal_area) > 0 and wh[i-1] != '#' and wh[i-1] != '\n'):
+                legal_area.append(i)
+
+    # If data isn't in pairs
+    if(len(legal_area)%2 != 0):
+        del legal_area[-1]
+    
+    # Find Areas Between 2 walls
+    # Check right hand side
+    for i in range(1,len(legal_area)-2,2):
+        if(legal_area[i+2] - legal_area[i] - wh_length+1 != 0):
+            if(len(right_side) <= 0):
+                right_side.append(legal_area[i]+wh_length+1)
+                right_side.append(legal_area[i+2])
+            elif(len(right_side) > 0):
+                right_side.append(right_side[-2]+wh_length+1)
+                right_side.append(legal_area[i+2])
+
+    # Check left hand side
+    for i in range(0,len(legal_area),2):
+        if(legal_area[i] - legal_area[i-2] - wh_length != 1):
+            if(len(left_side) <= 0):
+                left_side.append(legal_area[i+2])
+                left_side.append(legal_area[i]+wh_length+1)
+            elif(len(left_side) > 0):
+                left_side.append(left_side[-2]+wh_length+1)
+                left_side.append(left_side[-2]+wh_length+1)
+                
     # Search Entire Warehouse in legal areas
     for i in range(len(wh)):
         if(legal_area[j] < i < legal_area[j+1]):
-            # Check Left Hand Side
+            # If between wall deviations i.e. between 2 walls - Right Side
+            if(len(right_side) > 1 and right_side[k] <= i <= right_side[k+1]):
+                wh[i] = 'X'
+            # If between wall deviations i.e. between 2 walls - Left Side
+            if(len(left_side) > 0 and left_side[l] <= i <= left_side[l+1]):
+                wh[i] = 'X'
+                
+            # Top Left Corners
             if(wh[i-wh_length-1] == '#' and wh[i-1] == '#' and wh[i] != '.'):
                 wh[i] = 'X'
-            # Check Right Hand Side
-            elif(wh[i] != '.' and wh[i+1] == '#'):
+
+            # Bottom Left Corners
+            elif(wh[i+wh_length+1] == '#' and wh[i-1] == '#' and wh[i] != '.'):
                 wh[i] = 'X'
+                    
+            # Top Right Corners
+            if(wh[i+1] == '#' and wh[i-1] != '.' and wh[i-1-wh_length-1] == '#'):
+                wh[i] = 'X'
+            # Bottom Right Corners
+            elif(wh[i+1] == '#' and wh[i-1] != '.' and wh[i-1+wh_length+1] == '#'):
+                wh[i] = 'X'
+                    
+            # Increment counter to test wall pairs
             if(j+2 < len(legal_area) and i == legal_area[j+1]-1):
                 j+= 2
-
+            # Increment counters to test rule 2
+            if(k+2 < len(right_side) and i == right_side[k+1]-1):
+                    k += 2
+            if(l+2 < len(left_side) and i == left_side[l+1]):
+                    l += 2
+                    
     # Remove Other Symbols in Warehouse
     for i in boxes:
         if(wh[i] != 'X'):
             wh[i] = ' '        
     for i in player:
+        if(wh[i] != 'X'):
+            wh[i] = ' '
+    for i in player_on_target:
+        if(wh[i] != 'X'):
+            wh[i] = ' '
+    for i in box_on_target:
         if(wh[i] != 'X'):
             wh[i] = ' '
     for i in target:
