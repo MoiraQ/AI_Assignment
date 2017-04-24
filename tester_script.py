@@ -15,13 +15,17 @@ from __future__ import division
 
 from sokoban import Warehouse
 
-from mySokobanSolver import my_team, taboo_cells, SokobanPuzzle, check_action_seq
+from search import *
+
+from mySokobanSolver import my_team, taboo_cells, SokobanPuzzle, check_action_seq, taboo_cells_positions
 from mySokobanSolver import solve_sokoban_elem, can_go_there, solve_sokoban_macro 
 
 puzzle_t1 ='''
 #######
 #@ $. #
 #######'''
+
+
 
 puzzle_t2 ='''
   #######
@@ -32,6 +36,29 @@ puzzle_t2 ='''
  #   .  #
  ########
 '''
+
+puzzle_t2 ='''
+  ####################
+  #              ##  #
+  #               #  #
+  #               # .#
+  #####  ####     #  #
+ ##          #    #  #
+ #   $ ##       #    #
+ # $@$.         #    #
+ #   $          #    #
+ #.  .           #   #
+ #                   #
+ #####################
+'''
+
+puzzle_t2 ='''
+#######
+#@    #
+#  $. #
+#     #
+#######'''
+
 
 puzzle_t3 ='''
 #######
@@ -84,6 +111,27 @@ def test_my_warehouse():
     print("Moving Right", sp.result(wh, "Right"))
     print("Goal Reached: ", sp.goal_test(wh))
 
+def test_taboo():
+    wh = Warehouse()
+    # read the puzzle from the multiline string 
+    wh.extract_locations(puzzle_t2.split(sep='\n'))
+    print(wh)
+    sp = SokobanPuzzle(wh)
+
+
+
+    print(sp.actions(wh))
+
+
+def test_search():
+    wh = Warehouse()
+    # read the puzzle from the multiline string 
+    wh.extract_locations(puzzle_t2.split(sep='\n'))
+    print(wh)
+    sp = SokobanPuzzle(wh)
+    node = breadth_first_graph_search(sp)
+    #print(node.path())
+    #print(node.solution())
 
 def test_warehouse_1():
     wh = Warehouse()
@@ -147,7 +195,8 @@ def test_solve_sokoban_macro():
 if __name__ == "__main__":
     pass    
 #    test_warehouse_1() # test Warehouse
-    test_my_warehouse()
+#    test_my_warehouse()
+    test_search()
 #    test_warehouse_2() # test Warehouse
     
 #    print(my_team())  # should print your team
