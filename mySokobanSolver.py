@@ -84,7 +84,7 @@ def taboo_cells_positions(warehouse):
 def check_row_taboo(warehouse, lines, x, y):
     cells = []
     taboo = True
-    while taboo and (x < len(lines[y]) and tuple((x + 1, y)) not in warehouse.walls):
+    while taboo and (x < len(lines[y]) and tuple((x, y)) not in warehouse.walls):
         if tuple((x, y)) in warehouse.targets:
             taboo = False
         elif tuple((x, y + 1)) not in warehouse.walls and tuple((x, y - 1)) not in warehouse.walls:
@@ -100,7 +100,7 @@ def check_row_taboo(warehouse, lines, x, y):
 def check_column_taboo(warehouse, lines, x, y):
     cells = []
     taboo = True
-    while taboo and (y < len(lines) and tuple((x, y + 1)) not in warehouse.walls):
+    while taboo and (y < len(lines) and tuple((x, y)) not in warehouse.walls):
         if tuple((x, y)) in warehouse.targets:
             taboo = False
         elif tuple((x + 1, y)) not in warehouse.walls and tuple((x - 1, y)) not in warehouse.walls:
