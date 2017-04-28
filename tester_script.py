@@ -14,6 +14,7 @@ from __future__ import division
 
 
 from sokoban import Warehouse
+import time
 
 from search import *
 
@@ -132,13 +133,15 @@ def test_actions_and_results():
 
 
 def test_search():
-    problem_file = "./warehouses/warehouse_01.txt"
+    problem_file = "./warehouses/warehouse_143.txt"
     wh = Warehouse()
     wh.read_warehouse_file(problem_file)
     print (wh)
     sp = SokobanPuzzle(wh)
+    start = time.time()
     node = breadth_first_graph_search(sp)
-    print(node.solution())
+    end = time.time()
+    print(node.solution(), "found in", end - start, "seconds")
     
 
 def test_warehouse_1():
