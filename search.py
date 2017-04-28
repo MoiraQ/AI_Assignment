@@ -311,7 +311,6 @@ def graph_search(problem, frontier):
     explored = set() # initial empty set of explored states
     while frontier:
         node = frontier.pop()
-        print (node)
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)

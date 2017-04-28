@@ -13,6 +13,8 @@ import search
 
 import sokoban
 
+import copy
+
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -218,9 +220,11 @@ class SokobanPuzzle(search.Problem):
         """
 
         next_state = state.copy()
+        next_state.boxes = copy.copy(state.boxes)
         
         if (action in self.actions(next_state)):
-            worker = list(next_state.worker)            
+            worker = list(next_state.worker)
+            
             if (action == "Left"):                
                 worker[0] -= 1
                 if (tuple(worker) in next_state.boxes):
