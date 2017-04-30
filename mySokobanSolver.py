@@ -296,7 +296,18 @@ def check_action_seq(warehouse, action_seq):
                string returned by the method  Warehouse.__str__()
     '''
     
-    ##         "INSERT YOUR CODE HERE"
+    possible = True
+    current_state = tuple((x,y))
+    for action in action_seq:
+        current_state = SokobanPuzzle.result(self, current_state, action)
+        if current_state in warehouse.walls:
+            possible = False
+
+    if possible:
+        return action_seq
+    else:
+        return False
+    
     
     raise NotImplementedError()
 
@@ -337,7 +348,7 @@ def can_go_there(warehouse, dst):
       False otherwise
     '''
     
-    ##         "INSERT YOUR CODE HERE"
+    
     
     raise NotImplementedError()
 
