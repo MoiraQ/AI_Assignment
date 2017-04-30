@@ -297,9 +297,9 @@ def check_action_seq(warehouse, action_seq):
     '''
     
     possible = True
-    current_state = tuple((x,y))
+    current_state = warehouse.worker
     for action in action_seq:
-        current_state = SokobanPuzzle.result(self, current_state, action)
+        current_state = SokobanPuzzle.result(warehouse.worker, current_state, action)
         if current_state in warehouse.walls:
             possible = False
 
