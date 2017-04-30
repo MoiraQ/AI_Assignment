@@ -14,6 +14,7 @@ from __future__ import division
 
 
 from sokoban import Warehouse
+import time
 
 from search import *
 
@@ -53,12 +54,12 @@ puzzle_t2 ='''
 '''
 
 puzzle_t2 ='''
-#########
-#@      #
-#       #   
-#    $# #
-#     #.#
-#########'''
+#######
+#     #
+#@    #   
+#  $# #
+#   #.#
+#######'''
 
 
 puzzle_t3 ='''
@@ -117,8 +118,8 @@ def test_taboo():
     # read the puzzle from the multiline string 
     wh.extract_locations(puzzle_t2.split(sep='\n'))
     print(wh)
-    sp = SokobanPuzzle(wh)
-    print(sp.actions(wh))
+    print (taboo_cells(wh))
+    
 
 
 
@@ -128,21 +129,20 @@ def test_actions_and_results():
     wh.extract_locations(puzzle_t2.split(sep='\n'))
     print(wh)
     sp = SokobanPuzzle(wh)
-    print(sp.actions(wh))
-    sp.result(wh, "Right")
-    print(wh)
-    
+    print(sp.actions(wh))   
 
 
 def test_search():
+    problem_file = "./warehouses/warehouse_143.txt"
     wh = Warehouse()
-    # read the puzzle from the multiline string 
-    wh.extract_locations(puzzle_t2.split(sep='\n'))
-    print(wh)
+    wh.read_warehouse_file(problem_file)
+    print (wh)
     sp = SokobanPuzzle(wh)
-    node = breadth_first_tree_search(sp)
-    print(node.path())
-    print(node.solution())
+    start = time.time()
+    node = breadth_first_graph_search(sp)
+    end = time.time()
+    print(node.solution(), "found in", end - start, "seconds")
+    
 
 def test_warehouse_1():
     wh = Warehouse()
