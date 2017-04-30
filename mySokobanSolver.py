@@ -269,6 +269,17 @@ class SokobanPuzzle(search.Problem):
 
         return True
         
+    def h(self, node):
+        '''
+        Heuristic for A star Search:
+            Calculates Manhattan distance between box and closest target.
+
+       @return
+           Manhattan distance between box and closest target
+
+        '''
+        # INSERT YOUR CODE HERE
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -319,7 +330,15 @@ def solve_sokoban_elem(warehouse):
             If the puzzle is already in a goal state, simply return []
     '''
     
-    ##         "INSERT YOUR CODE HERE"
+    sp = SokobanPuzzle(warehouse)
+    sol = search.breadth_first_graph_search(sp)
+##    sol = search.astar_graph_search(sp)
+    moves = []
+
+    if sol is None:
+        return ['Impossible']
+    else:
+        return sol.solution()
     
     raise NotImplementedError()
 
