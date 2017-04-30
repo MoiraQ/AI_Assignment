@@ -13,6 +13,8 @@ import search
 
 import sokoban
 
+import copy
+
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -27,6 +29,91 @@ def my_team():
     return [ (9708651, 'Christopher', 'O\'Rafferty'), (9400001, 'Moira', 'Quinn'), (1234569, 'Eva', 'Tardos') ]
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def taboo_cells_positions(warehouse):
+    lines = str(warehouse).split(sep='\n')
+    tabooCells = []
+    
+    for y in range(len(lines)):
+        inside = False
+        for x in range(len(lines[y])):
+            curCheck = tuple((x, y))
+            checkXRow = False
+            checkYRow = False
+            if curCheck in warehouse.walls:
+                inside = True
+            else:
+                if inside and curCheck not in warehouse.targets:
+                    # Check Left Side
+                    if tuple((x - 1, y)) in warehouse.walls:                        
+                        # Check Top Left                        
+                        if tuple((x, y - 1)) in warehouse.walls:
+                            # Check Top Row
+                            tabooCells.extend(check_row_taboo(warehouse, lines, x, y))
+                                
+                            # Check Left Column                            
+                            tabooCells.extend(check_column_taboo(warehouse, lines, x, y))
+                            
+                            if curCheck not in tabooCells:
+                                tabooCells.append(curCheck)
+                                                 
+                        
+                        # Check Bottom Left
+                        elif tuple((x, y + 1)) in warehouse.walls:
+                            # Check Bottom Row
+                            tabooCells.extend(check_row_taboo(warehouse, lines, x, y))
+                            if curCheck not in tabooCells:
+                                tabooCells.append(curCheck)
+
+                    # Check Right Side
+                    if tuple((x + 1, y)) in warehouse.walls:                        
+                        # Check Top Right
+                        if tuple((x, y - 1)) in warehouse.walls:
+                            # Check Right Column                            
+                            tabooCells.extend(check_column_taboo(warehouse, lines, x, y))
+                            if curCheck not in tabooCells:
+                                tabooCells.append(curCheck)
+                                
+                        # Check Bottom Right
+                        elif tuple((x, y + 1)) in warehouse.walls:
+                            tabooCells.append(curCheck)
+                            
+    return tabooCells
+
+                    
+def check_row_taboo(warehouse, lines, x, y):
+    cells = []
+    taboo = True
+    while taboo and (x < len(lines[y]) and tuple((x, y)) not in warehouse.walls):
+        if tuple((x, y)) in warehouse.targets:
+            taboo = False
+        elif tuple((x, y + 1)) not in warehouse.walls and tuple((x, y - 1)) not in warehouse.walls:
+            taboo = False
+
+        cells.append(tuple((x, y)))
+        x += 1
+    if taboo:
+        return cells
+    else:
+        return []
+
+def check_column_taboo(warehouse, lines, x, y):
+    cells = []
+    taboo = True
+    while taboo and (y < len(lines) and tuple((x, y)) not in warehouse.walls):
+        if tuple((x, y)) in warehouse.targets:
+            taboo = False
+        elif tuple((x + 1, y)) not in warehouse.walls and tuple((x - 1, y)) not in warehouse.walls:
+            taboo = False
+
+        cells.append(tuple((x, y)))
+        y += 1
+        
+    if taboo:
+        return cells
+    else:
+        return []
+    
 
 def taboo_cells(warehouse):
     '''  
@@ -47,7 +134,23 @@ def taboo_cells(warehouse):
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
     '''
-    raise NotImplementedError()
+    tabooCells = taboo_cells_positions(warehouse)
+    lines = str(warehouse).split(sep='\n')
+    whStr = ""
+    for y in range(len(lines)):
+        line = ""
+        for x in range(len(lines[y])):
+            if lines[y][x] == "#":
+                line += "#"
+            else:
+                if tuple((x, y)) in tabooCells:
+                    line += "X"
+                else:
+                    line += " "
+        whStr += line + "\n"
+    return whStr
+        
+    
 
 
 
@@ -66,7 +169,9 @@ class SokobanPuzzle(search.Problem):
     ##         "INSERT YOUR CODE HERE"
     
     def __init__(self, warehouse):
-        self.warehouse = warehouse        
+        self.warehouse = warehouse
+        self.tabooCells = taboo_cells_positions(warehouse)
+        self.initial = warehouse
 
     def actions(self, state):
         """
@@ -78,28 +183,28 @@ class SokobanPuzzle(search.Problem):
 
         if (tuple((state.worker[0]-1, state.worker[1])) not in state.walls):
             if (tuple((state.worker[0]-1, state.worker[1])) in state.boxes):
-                if (tuple((state.worker[0]-2, state.worker[1])) not in state.boxes + state.walls):
+                if (tuple((state.worker[0]-2, state.worker[1])) not in state.boxes + state.walls + self.tabooCells):
                     _actions.append('Left')
             else:
                 _actions.append('Left')
             
         if (tuple((state.worker[0], state.worker[1]+1)) not in state.walls):
             if (tuple((state.worker[0], state.worker[1]+1)) in state.boxes):
-                if (tuple((state.worker[0], state.worker[1]+2)) not in state.boxes + state.walls):
+                if (tuple((state.worker[0], state.worker[1]+2)) not in state.boxes + state.walls + self.tabooCells):
                     _actions.append('Down')
             else:
                 _actions.append('Down')
             
         if (tuple((state.worker[0]+1, state.worker[1])) not in state.walls):
             if (tuple((state.worker[0]+1, state.worker[1])) in state.boxes):
-                if (tuple((state.worker[0]+2, state.worker[1])) not in state.boxes + state.walls):
+                if (tuple((state.worker[0]+2, state.worker[1])) not in state.boxes + state.walls + self.tabooCells):
                     _actions.append('Right')
             else:
                 _actions.append('Right')
             
         if (tuple((state.worker[0], state.worker[1]-1)) not in state.walls):
             if (tuple((state.worker[0], state.worker[1]-1)) in state.boxes):
-                if (tuple((state.worker[0], state.worker[1]-2)) not in state.boxes + state.walls):
+                if (tuple((state.worker[0], state.worker[1]-2)) not in state.boxes + state.walls + self.tabooCells):
                     _actions.append('Up')
             else:
                 _actions.append('Up')
@@ -113,41 +218,45 @@ class SokobanPuzzle(search.Problem):
         action in the given state. The action must be one of
         self.actions(state).
         """
-        if (action in self.actions(state)):
-            worker = list(state.worker)
+
+        next_state = state.copy()
+        next_state.boxes = copy.copy(state.boxes)
+        
+        if (action in self.actions(next_state)):
+            worker = list(next_state.worker)
             
             if (action == "Left"):                
                 worker[0] -= 1
-                if (tuple(worker) in state.boxes):
-                    index = state.boxes.index(tuple(worker))             
-                    box = list(state.boxes[index])
+                if (tuple(worker) in next_state.boxes):
+                    index = next_state.boxes.index(tuple(worker))             
+                    box = list(next_state.boxes[index])
                     box[0] -= 1
-                    state.boxes[index] = tuple(box)
+                    next_state.boxes[index] = tuple(box)
             if (action == "Right"):                
                 worker[0] += 1
-                if (tuple(worker) in state.boxes):
-                    index = state.boxes.index(tuple(worker))             
-                    box = list(state.boxes[index])
+                if (tuple(worker) in next_state.boxes):
+                    index = next_state.boxes.index(tuple(worker))             
+                    box = list(next_state.boxes[index])
                     box[0] += 1
-                    state.boxes[index] = tuple(box)
+                    next_state.boxes[index] = tuple(box)
             if (action == "Up"):                
                 worker[1] -= 1
-                if (tuple(worker) in state.boxes):
-                    index = state.boxes.index(tuple(worker))             
-                    box = list(state.boxes[index])
+                if (tuple(worker) in next_state.boxes):
+                    index = next_state.boxes.index(tuple(worker))             
+                    box = list(next_state.boxes[index])
                     box[1] -= 1
-                    state.boxes[index] = tuple(box)
+                    next_state.boxes[index] = tuple(box)
             if (action == "Down"):                
                 worker[1] += 1
-                if (tuple(worker) in state.boxes):
-                    index = state.boxes.index(tuple(worker))             
-                    box = list(state.boxes[index])
+                if (tuple(worker) in next_state.boxes):
+                    index = next_state.boxes.index(tuple(worker))             
+                    box = list(next_state.boxes[index])
                     box[1] += 1
-                    state.boxes[index] = tuple(box)
+                    next_state.boxes[index] = tuple(box)
 
-            state.worker = tuple(worker)
+            next_state.worker = tuple(worker)
 
-        return state
+        return next_state
 
     
     def goal_test(self, state):
