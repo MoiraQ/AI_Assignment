@@ -456,7 +456,12 @@ def solve_sokoban_macro(warehouse):
         If the puzzle is already in a goal state, simply return []
     '''
 
+    
     sp = SokobanPuzzle(warehouse, elem = False)
+    test = []
+    test.extend(sp.actions(warehouse))
+    return test
+    
     ##sol = search.breadth_first_graph_search(sp)
     sol = search.astar_graph_search(sp)
 
@@ -467,8 +472,31 @@ def solve_sokoban_macro(warehouse):
         for action in sol.solution():
             M.append(((action[0][1], action[0][0]), action[1]))
         return M
+    
 
+    
+    
+    """
+    wh = warehouse
+    sp = SokobanPuzzle(wh)
+    M = []
 
+    
+    
+    
+    solution = solve_sokoban_elem(wh)
+    if solution == ['Impossible']:
+        return ['Impossible']
+
+    for action in solution:
+        test = sp.result(wh, action)
+        if not test.boxes == wh.boxes:
+            M.append(((test.worker[1], test.worker[0]), action))
+        wh = test
+
+    return M
+    """
+    
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
