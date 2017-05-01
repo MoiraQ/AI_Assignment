@@ -152,7 +152,8 @@ def taboo_cells(warehouse):
         
     
 
-
+def manhattan_dist(pos1, pos2):
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1]);
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -168,10 +169,12 @@ class SokobanPuzzle(search.Problem):
     '''
     ##         "INSERT YOUR CODE HERE"
     
-    def __init__(self, warehouse):
+    def __init__(self, warehouse, targetPos = None, elem = True):
         self.warehouse = warehouse
         self.tabooCells = taboo_cells_positions(warehouse)
         self.initial = warehouse
+        self.targetPos = targetPos # If there is a target pos than this was created for can_go_there
+        self.elem = elem # If elem is false then we are solving with macro
 
     def actions(self, state):
         """
@@ -181,33 +184,64 @@ class SokobanPuzzle(search.Problem):
         """
         _actions = []
 
-        if (tuple((state.worker[0]-1, state.worker[1])) not in state.walls):
-            if (tuple((state.worker[0]-1, state.worker[1])) in state.boxes):
-                if (tuple((state.worker[0]-2, state.worker[1])) not in state.boxes + state.walls + self.tabooCells):
+        if self.elem:
+            if (tuple((state.worker[0]-1, state.worker[1])) not in state.walls):
+                if (not self.targetPos and tuple((state.worker[0]-1, state.worker[1])) in state.boxes):
+                    if (tuple((state.worker[0]-2, state.worker[1])) not in state.boxes + state.walls + self.tabooCells):
+                        _actions.append('Left')
+                elif (self.targetPos and tuple((state.worker[0]-1, state.worker[1])) not in state.boxes):
                     _actions.append('Left')
-            else:
-                _actions.append('Left')
-            
-        if (tuple((state.worker[0], state.worker[1]+1)) not in state.walls):
-            if (tuple((state.worker[0], state.worker[1]+1)) in state.boxes):
-                if (tuple((state.worker[0], state.worker[1]+2)) not in state.boxes + state.walls + self.tabooCells):
+                elif (not self.targetPos):
+                    _actions.append('Left')
+                
+            if (tuple((state.worker[0], state.worker[1]+1)) not in state.walls):
+                if (not self.targetPos and tuple((state.worker[0], state.worker[1]+1)) in state.boxes):
+                    if (tuple((state.worker[0], state.worker[1]+2)) not in state.boxes + state.walls + self.tabooCells):
+                        _actions.append('Down')
+                elif (self.targetPos and tuple((state.worker[0], state.worker[1]+1)) not in state.boxes):
                     _actions.append('Down')
-            else:
-                _actions.append('Down')
-            
-        if (tuple((state.worker[0]+1, state.worker[1])) not in state.walls):
-            if (tuple((state.worker[0]+1, state.worker[1])) in state.boxes):
-                if (tuple((state.worker[0]+2, state.worker[1])) not in state.boxes + state.walls + self.tabooCells):
+                elif (not self.targetPos):
+                    _actions.append('Down')
+                
+            if (tuple((state.worker[0]+1, state.worker[1])) not in state.walls):
+                if (not self.targetPos and tuple((state.worker[0]+1, state.worker[1])) in state.boxes):
+                    if (tuple((state.worker[0]+2, state.worker[1])) not in state.boxes + state.walls + self.tabooCells):
+                        _actions.append('Right')
+                elif (self.targetPos and tuple((state.worker[0]+1, state.worker[1])) not in state.boxes):
                     _actions.append('Right')
-            else:
-                _actions.append('Right')
-            
-        if (tuple((state.worker[0], state.worker[1]-1)) not in state.walls):
-            if (tuple((state.worker[0], state.worker[1]-1)) in state.boxes):
-                if (tuple((state.worker[0], state.worker[1]-2)) not in state.boxes + state.walls + self.tabooCells):
+                elif (not self.targetPos):
+                    _actions.append('Right')
+                
+            if (tuple((state.worker[0], state.worker[1]-1)) not in state.walls):
+                if (not self.targetPos and tuple((state.worker[0], state.worker[1]-1)) in state.boxes):
+                    if (tuple((state.worker[0], state.worker[1]-2)) not in state.boxes + state.walls + self.tabooCells):
+                        _actions.append('Up')
+                elif (self.targetPos and tuple((state.worker[0], state.worker[1]-1)) not in state.boxes):
                     _actions.append('Up')
-            else:
-                _actions.append('Up')
+                elif (not self.targetPos):
+                    _actions.append('Up')
+
+        else:
+            for box in state.boxes:
+                left = (box[0]-1, box[1])
+                right = (box[0]+1, box[1])
+                up = (box[0], box[1]-1)
+                down = (box[0], box[1]+1)
+                
+                if (left not in state.boxes and left not in state.walls):
+                    if (right not in state.boxes and right not in state.walls):
+                        if (left not in self.tabooCells and can_go_there_regular(state, right)):
+                            _actions.append((box, "Left"))
+                        if (right not in self.tabooCells and can_go_there_regular(state, left)):
+                            _actions.append((box, "Right"))
+                if (up not in state.boxes and up not in state.walls):
+                    if (down not in state.boxes and down not in state.walls):
+                        if (up not in self.tabooCells and can_go_there_regular(state, down)):
+                            _actions.append((box, "Up"))
+                        if (down not in self.tabooCells and can_go_there_regular(state, up)):
+                            _actions.append((box, "Down"))
+                        
+            
 
             
         return _actions
@@ -221,40 +255,60 @@ class SokobanPuzzle(search.Problem):
 
         next_state = state.copy()
         next_state.boxes = copy.copy(state.boxes)
-        
+
         if (action in self.actions(next_state)):
-            worker = list(next_state.worker)
-            
-            if (action == "Left"):                
-                worker[0] -= 1
-                if (tuple(worker) in next_state.boxes):
-                    index = next_state.boxes.index(tuple(worker))             
+            if (self.elem):
+                worker = list(next_state.worker)
+                
+                if (action == "Left"):                
+                    worker[0] -= 1
+                    if (tuple(worker) in next_state.boxes):
+                        index = next_state.boxes.index(tuple(worker))             
+                        box = list(next_state.boxes[index])
+                        box[0] -= 1
+                        next_state.boxes[index] = tuple(box)
+                if (action == "Right"):                
+                    worker[0] += 1
+                    if (tuple(worker) in next_state.boxes):
+                        index = next_state.boxes.index(tuple(worker))             
+                        box = list(next_state.boxes[index])
+                        box[0] += 1
+                        next_state.boxes[index] = tuple(box)
+                if (action == "Up"):                
+                    worker[1] -= 1
+                    if (tuple(worker) in next_state.boxes):
+                        index = next_state.boxes.index(tuple(worker))             
+                        box = list(next_state.boxes[index])
+                        box[1] -= 1
+                        next_state.boxes[index] = tuple(box)
+                if (action == "Down"):                
+                    worker[1] += 1
+                    if (tuple(worker) in next_state.boxes):
+                        index = next_state.boxes.index(tuple(worker))             
+                        box = list(next_state.boxes[index])
+                        box[1] += 1
+                        next_state.boxes[index] = tuple(box)
+
+                next_state.worker = tuple(worker)
+
+            else:
+                index = next_state.boxes.index(action[0])
+                if (action[1] == "Left"):
                     box = list(next_state.boxes[index])
                     box[0] -= 1
                     next_state.boxes[index] = tuple(box)
-            if (action == "Right"):                
-                worker[0] += 1
-                if (tuple(worker) in next_state.boxes):
-                    index = next_state.boxes.index(tuple(worker))             
+                if (action[1] == "Right"):
                     box = list(next_state.boxes[index])
                     box[0] += 1
                     next_state.boxes[index] = tuple(box)
-            if (action == "Up"):                
-                worker[1] -= 1
-                if (tuple(worker) in next_state.boxes):
-                    index = next_state.boxes.index(tuple(worker))             
+                if (action[1] == "Up"):
                     box = list(next_state.boxes[index])
                     box[1] -= 1
                     next_state.boxes[index] = tuple(box)
-            if (action == "Down"):                
-                worker[1] += 1
-                if (tuple(worker) in next_state.boxes):
-                    index = next_state.boxes.index(tuple(worker))             
+                if (action[1] == "Down"):
                     box = list(next_state.boxes[index])
                     box[1] += 1
                     next_state.boxes[index] = tuple(box)
-
-            next_state.worker = tuple(worker)
 
         return next_state
 
@@ -263,6 +317,10 @@ class SokobanPuzzle(search.Problem):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
         method if checking against a single self.goal is not enough."""
+
+        if self.targetPos:
+            return self.targetPos == state.worker
+        
         for box in state.boxes:
             if box not in state.targets:
                 return False
@@ -278,8 +336,12 @@ class SokobanPuzzle(search.Problem):
            Manhattan distance between box and closest target
 
         '''
+        
         state = node.state
         totalH = 0
+        if self.targetPos:
+            return manhattan_dist(state.worker, self.targetPos)
+        
         for box in state.boxes:
             smallestDist = 99999999
             for target in state.targets:
@@ -343,7 +405,6 @@ def solve_sokoban_elem(warehouse):
     sp = SokobanPuzzle(warehouse)
     ##sol = search.breadth_first_graph_search(sp)
     sol = search.astar_graph_search(sp)
-    moves = []
 
     if sol is None:
         return ['Impossible']
@@ -351,6 +412,12 @@ def solve_sokoban_elem(warehouse):
         return sol.solution()    
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def can_go_there_regular(warehouse, dst):
+    '''    
+    dst = (col, row) Like everything else!
+    '''    
+    return can_go_there(warehouse, (dst[1], dst[0]))
 
 def can_go_there(warehouse, dst):
     '''    
@@ -364,9 +431,9 @@ def can_go_there(warehouse, dst):
       False otherwise
     '''
     
-    ##         "INSERT YOUR CODE HERE"
-    
-    raise NotImplementedError()
+    sp = SokobanPuzzle(warehouse, targetPos = (dst[1], dst[0]))
+    sol = search.astar_graph_search(sp)
+    return not sol == None
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -388,19 +455,20 @@ def solve_sokoban_macro(warehouse):
         Otherwise return M a sequence of macro actions that solves the puzzle.
         If the puzzle is already in a goal state, simply return []
     '''
-    
-    wh = warehouse
-    sp = SokobanPuzzle(wh)
-    M = []
-    solution = solve_sokoban_elem(wh)
 
-    for action in solution:
-        test = sp.result(wh, action)
-        if not test.boxes == wh.boxes:
-            M.append(((test.worker[1], test.worker[0]), action))
-        wh = test
+    sp = SokobanPuzzle(warehouse, elem = False)
+    ##sol = search.breadth_first_graph_search(sp)
+    sol = search.astar_graph_search(sp)
 
-    return M
+    if sol is None:
+        return ['Impossible']
+    else:
+        M=[]
+        for action in sol.solution():
+            M.append(((action[0][1], action[0][0]), action[1]))
+        return M
+
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
