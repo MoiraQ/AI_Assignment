@@ -268,7 +268,7 @@ class SokobanPuzzle(search.Problem):
         if (action in self.actions(next_state)):
             if (self.elem):
                 worker = list(next_state.worker)
-                
+
                 if (action == "Left"):                
                     worker[0] -= 1
                     if (tuple(worker) in next_state.boxes):
@@ -302,26 +302,20 @@ class SokobanPuzzle(search.Problem):
 
             else:
                 index = next_state.boxes.index(action[0])
+                box = list(next_state.boxes[index])
+
                 if (action[1] == "Left"):
-                    box = list(next_state.boxes[index])
                     box[0] -= 1
-                    next_state.boxes[index] = tuple(box)
-                    next_state.worker = action[0]
                 if (action[1] == "Right"):
-                    box = list(next_state.boxes[index])
                     box[0] += 1
-                    next_state.boxes[index] = tuple(box)
-                    next_state.worker = action[0]
                 if (action[1] == "Up"):
-                    box = list(next_state.boxes[index])
                     box[1] -= 1
-                    next_state.boxes[index] = tuple(box)
-                    next_state.worker = action[0]
                 if (action[1] == "Down"):
-                    box = list(next_state.boxes[index])
                     box[1] += 1
-                    next_state.boxes[index] = tuple(box)
-                    next_state.worker = action[0]
+
+                next_state.boxes[index] = tuple(box)
+                next_state.worker = action[0]
+                    
 
         return next_state
 
@@ -512,7 +506,6 @@ def solve_sokoban_macro(warehouse):
     wh = warehouse
     sp = SokobanPuzzle(wh, elem = False)
 
-    ##sol = search.breadth_first_graph_search(sp)
     sol = search.astar_graph_search(sp)
 
     if sol is None:

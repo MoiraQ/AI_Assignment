@@ -22,13 +22,14 @@ Make sure that your code runs without errors with this script.
 from __future__ import print_function
 from __future__ import division
 
+from search import breadth_first_graph_search
 
 from sokoban import Warehouse
 
 from mySokobanSolver import my_team, taboo_cells, SokobanPuzzle, check_action_seq, check_macro_action_seq
 from mySokobanSolver import solve_sokoban_elem, can_go_there, solve_sokoban_macro 
 
-
+import time
 
 
 puzzle_t1 ='''
@@ -166,6 +167,40 @@ def test_solve_sokoban_macro():
 #    print(wh.worker) # x,y  coords !!
 #    print(wh.boxes)  # x,y  coords !!
 
+def test_solve_comparison():
+    problem_file = "./warehouses/warehouse_35.txt"
+    wh = Warehouse()
+    wh.read_warehouse_file(problem_file)
+    print(wh)
+
+    bfs = True
+    elem = True
+    macro = True    
+
+    if (bfs):
+        sp = SokobanPuzzle(wh)
+        start = time.time()
+        answer = breadth_first_graph_search(sp).solution()
+        end = time.time()
+        print("BFS Elem took:", end - start, "secs")
+        print(answer)
+        
+    if (elem):
+        start = time.time()
+        answer = solve_sokoban_elem(wh)
+        end = time.time()
+        print("A* elem took:", end - start, "secs")
+        print(answer)
+
+    if (macro):
+        start = time.time()
+        answer = solve_sokoban_macro(wh)
+        end = time.time()
+        print("A* macro took:", end - start, "secs")
+        print(answer)
+
+    
+
 def test_check_macro_action_seq():
     wh = Warehouse()
     wh.extract_locations(puzzle_t1.split(sep='\n'))
@@ -183,14 +218,15 @@ def test_check_macro_action_seq():
 
 if __name__ == "__main__":
     pass    
-    test_warehouse_1() # test Warehouse
-    test_warehouse_2() # test Warehouse
+    #test_warehouse_1() # test Warehouse
+    #test_warehouse_2() # test Warehouse
     
-    print(my_team())  # should print your team
+    #print(my_team())  # should print your team
 
-    test_taboo_cells() 
-    test_check_elem_action_seq()
-    test_solve_sokoban_elem()
-    test_can_go_there()
-    test_solve_sokoban_macro()   
-    test_check_macro_action_seq()
+    #test_taboo_cells() 
+    #test_check_elem_action_seq()
+    #test_solve_sokoban_elem()
+    #test_can_go_there()
+    #test_solve_sokoban_macro()   
+    #test_check_macro_action_seq()
+    test_solve_comparison()
