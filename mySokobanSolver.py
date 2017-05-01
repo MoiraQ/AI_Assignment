@@ -278,7 +278,17 @@ class SokobanPuzzle(search.Problem):
            Manhattan distance between box and closest target
 
         '''
-        # INSERT YOUR CODE HERE
+        state = node.state
+        totalH = 0
+        for box in state.boxes:
+            smallestDist = 99999999
+            for target in state.targets:
+                dist = manhattan_dist(box, target)
+                if dist < smallestDist:
+                    smallestDist = dist
+            totalH += smallestDist
+
+        return totalH
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -331,16 +341,14 @@ def solve_sokoban_elem(warehouse):
     '''
     
     sp = SokobanPuzzle(warehouse)
-    sol = search.breadth_first_graph_search(sp)
-##    sol = search.astar_graph_search(sp)
+    ##sol = search.breadth_first_graph_search(sp)
+    sol = search.astar_graph_search(sp)
     moves = []
 
     if sol is None:
         return ['Impossible']
     else:
-        return sol.solution()
-    
-    raise NotImplementedError()
+        return sol.solution()    
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -381,9 +389,18 @@ def solve_sokoban_macro(warehouse):
         If the puzzle is already in a goal state, simply return []
     '''
     
-    ##         "INSERT YOUR CODE HERE"
-    
-    raise NotImplementedError()
+    wh = warehouse
+    sp = SokobanPuzzle(wh)
+    M = []
+    solution = solve_sokoban_elem(wh)
+
+    for action in solution:
+        test = sp.result(wh, action)
+        if not test.boxes == wh.boxes:
+            M.append(((test.worker[1], test.worker[0]), action))
+        wh = test
+
+    return M
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
