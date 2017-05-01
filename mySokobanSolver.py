@@ -379,7 +379,26 @@ def check_action_seq(warehouse, action_seq):
                string returned by the method  Warehouse.__str__()
     '''
     
-    ##         "INSERT YOUR CODE HERE"
+    possible = True
+    for action in action_seq:
+        worker = list(warehouse.worker)
+        if (action == "Left"):                
+                worker[0] -= 1
+        if (action == "Right"):                
+                worker[0] += 1
+        if (action == "Up"):                
+                worker[1] -= 1
+        if (action == "Down"):                
+                worker[1] += 1
+        current_tuple = tuple(worker)
+        warehouse.worker = current_tuple
+        if current_tuple in warehouse.walls:
+            possible = False
+
+    if possible:
+        return warehouse.__str__()
+    else:
+        return False
     
     raise NotImplementedError()
 
