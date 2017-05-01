@@ -25,10 +25,9 @@ from __future__ import division
 
 from sokoban import Warehouse
 
-from mySokobanSolver import my_team, taboo_cells, SokobanPuzzle, check_action_seq
+from mySokobanSolver import my_team, taboo_cells, SokobanPuzzle, check_action_seq, check_macro_action_seq
 from mySokobanSolver import solve_sokoban_elem, can_go_there, solve_sokoban_macro 
 
-import time
 
 
 
@@ -44,17 +43,6 @@ puzzle_t2 ='''
  ## $@$ #
  #  .$. #
  #      #
- ########
-'''
-
-puzzle_t2 ='''
-  #######
-  #     #
-  #    @#
- ##     #
- ### ####
- #   $  #
- #     .#
  ########
 '''
 
@@ -123,7 +111,7 @@ def test_taboo_cells():
         print('Test taboo_cells passed\n')
     else:
         print('** Test taboo_cells failed\n')
-
+        
 #    assert( answer.strip() == expected_answer_3.strip() )
 
 
@@ -153,80 +141,28 @@ def test_solve_sokoban_elem():
         print('Test solve_sokoban_elem passed\n')
     else:
         print('** Test solve_sokoban_elem failed\n')
-
-    problem_file = "./warehouses/warehouse_19.txt"
-    wh = Warehouse()
-    wh.read_warehouse_file(problem_file)
-    print(wh)
-    print('\nElementary solution')
-    start = time.time()
-    answer = solve_sokoban_elem(wh)
-    end = time.time()
-    print(answer)
-    print('\nSolver took', end - start,'seconds')
-    
-    if  answer is ['Impossible']:
-        print(answer)
-    elif answer ==  ['Right', 'Right']:
-        print('\nTest solve_sokoban_elem passed\n')
-    else:
-        print('\n** Test solve_sokoban_elem failed\n')
+        
 
 def test_can_go_there():
     problem_file = "./warehouses/warehouse_01.txt"
     wh = Warehouse()
     wh.read_warehouse_file(problem_file)
     print(wh)
-    start = time.time()
     answer = can_go_there(wh,(30,2))
-    end = time.time()
-    print(answer, "took", end-start, "secs")
-    #assert( answer ==  False)
-    start = time.time()
-    answer = can_go_there(wh,(6,2))    
+    assert( answer ==  False)
+    answer = can_go_there(wh,(6,2))
     assert( answer ==  True)
-
-def test_can_go_there2():
-    wh = Warehouse()
-    wh.extract_locations(puzzle_t2.split(sep='\n'))
-    print(wh)
-    #assert( answer ==  False)
-    start = time.time()
-    answer = can_go_there(wh, wh.targets[0])
-    end = time.time()
-    print(answer, "took", end-start, "secs")
-
-
-def Test_search():
-    problem_file = "./warehouses/warehouse_03.txt"
-    wh = Warehouse()
-    wh.read_warehouse_file(problem_file)
-    print(wh)
-
-    """
-    start = time.time()
-    answer = solve_sokoban_elem(wh)
-    end = time.time()
-    print(answer)
-    print("Elem took", end-start, "secs")    
-    """
+    print ("Can go there passed")
     
-    start = time.time()
-    answer = solve_sokoban_macro(wh)
-    end = time.time()
-    print(answer)
-    print("Macro took", end-start, "secs")
-
-
   
 def test_solve_sokoban_macro():
     wh = Warehouse()
     wh.extract_locations(puzzle_t3.split(sep='\n'))
     print(wh)
     answer = solve_sokoban_macro(wh)
-    print (answer)
-    print ("Test Answer:", [ ((2,3),'Right'), ((2,4),'Right'), ((3,3),'Left') , ((3,2),'Left') ])
+    print(answer)
     assert( answer ==  [ ((2,3),'Right'), ((2,4),'Right'), ((3,3),'Left') , ((3,2),'Left') ] )
+    print("Solve Sokoban Macro passed")
 #    print(wh.worker) # x,y  coords !!
 #    print(wh.boxes)  # x,y  coords !!
 
@@ -241,18 +177,20 @@ def test_check_macro_action_seq():
     print( check_macro_action_seq(wh.copy(),[((2, 3), 'Right')]) )
     print("\ntesting [((2, 3), 'Left')]")
     print( check_macro_action_seq(wh.copy(), [((2, 3), 'Left')]) )
+
+    print("Should work for the first but not second")
     
 
 if __name__ == "__main__":
     pass    
-#    test_warehouse_1() # test Warehouse
-#    test_warehouse_2() # test Warehouse
+    test_warehouse_1() # test Warehouse
+    test_warehouse_2() # test Warehouse
     
-#    print(my_team())  # should print your team
-    Test_search()
-    #test_taboo_cells() 
+    print(my_team())  # should print your team
+
+    test_taboo_cells() 
     test_check_elem_action_seq()
-   # test_solve_sokoban_elem()
-#    test_can_go_there()
-#    test_solve_sokoban_macro()   
-#    test_check_macro_action_seq()
+    test_solve_sokoban_elem()
+    test_can_go_there()
+    test_solve_sokoban_macro()   
+    test_check_macro_action_seq()
